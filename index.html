@@ -68,6 +68,7 @@ button{
 
 /* PATCH: flat buttons */
 .start-btn{background:var(--start);color:white}
+.start-btn:disabled{opacity:0.5;cursor:not-allowed}
 .stop-btn{background:var(--stop);color:white}
 .stop-btn:disabled{opacity:0.5;cursor:not-allowed}
 
@@ -85,8 +86,30 @@ button{
 
 .divider{height:1px;background:var(--border);margin:12px 0}
 
-table{width:100%;border-collapse:collapse}
-th,td{padding:10px;border-bottom:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;overflow-x:auto;display:block}
+thead{display:table;width:100%;table-layout:fixed}
+tbody{display:table;width:100%;table-layout:fixed}
+th,td{padding:10px;border-bottom:1px solid var(--border);word-wrap:break-word;overflow-wrap:break-word}
+th:nth-child(1),td:nth-child(1){width:30%}
+th:nth-child(2),td:nth-child(2){width:25%}
+th:nth-child(3),td:nth-child(3){width:20%}
+th:nth-child(4),td:nth-child(4){width:25%}
+
+@media(max-width:768px){
+  th,td{padding:8px 4px;font-size:13px}
+  th:nth-child(1),td:nth-child(1){width:35%}
+  th:nth-child(2),td:nth-child(2){width:25%}
+  th:nth-child(3),td:nth-child(3){width:15%}
+  th:nth-child(4),td:nth-child(4){width:25%}
+}
+
+@media(max-width:480px){
+  th,td{padding:6px 2px;font-size:12px}
+  th:nth-child(1),td:nth-child(1){width:40%;font-size:11px}
+  th:nth-child(2),td:nth-child(2){width:30%;font-size:11px}
+  th:nth-child(3),td:nth-child(3){width:12%;text-align:center}
+  th:nth-child(4),td:nth-child(4){width:18%;font-size:11px}
+}
 
 .pagination{display:flex;justify-content:center;gap:6px;margin-top:14px}
 .page-btn{padding:8px 14px;border-radius:999px;background:var(--border);cursor:pointer}
@@ -104,7 +127,9 @@ th,td{padding:10px;border-bottom:1px solid var(--border)}
 .modal-bg{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.35);
+  background:rgba(0,0,0,.5);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
   display:none;
   align-items:center;
   justify-content:center;
@@ -114,21 +139,26 @@ th,td{padding:10px;border-bottom:1px solid var(--border)}
   background:var(--card);
   color:var(--text);
   border-radius:16px;
-  padding:24px;
-  width:90%;
-  max-width:420px;
+  padding:20px;
+  width:85%;
+  max-width:360px;
   text-align:center;
+  box-shadow:0 20px 25px -5px rgba(0,0,0,.3);
 }
 .modal h3{
   margin-top:0;
+  font-size:18px;
 }
 .modal p{
   color:var(--muted);
+  font-size:14px;
+  margin:8px 0;
 }
 .modal button{
   background:var(--accent);
   color:white;
   margin-top:8px;
+  font-size:14px;
 }
 .modal-actions{
   display:flex;
@@ -192,21 +222,6 @@ th,td{padding:10px;border-bottom:1px solid var(--border)}
   border-top:3px solid #fff;
   margin:0;
 }
-.refresh-btn{
-  background:#fff;
-  color:#22c55e;
-  padding:8px 16px;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:14px;
-  font-weight:600;
-  border:none;
-  width:auto;
-  margin:0;
-}
-.refresh-btn:hover{
-  background:#f0f0f0;
-}
 
 /* Queue banner */
 .queue-banner{
@@ -253,7 +268,6 @@ a{color:var(--accent);text-decoration:none}
 <div class="no-internet-banner" id="noInternetBanner">
   <span id="connectionMessage">No internet connection, please try again...</span>
   <div class="spinner" id="connectionSpinner"></div>
-  <button class="refresh-btn" id="refreshBtn" onclick="refreshAllData()" style="display:none">Refresh Data</button>
 </div>
 
 <!-- Queue Banner -->
@@ -295,7 +309,7 @@ a{color:var(--accent);text-decoration:none}
 
 <!-- SESSION -->
 <div class="card">
-  <input id="urlInput" placeholder="Paste chapter URL">
+  <input id="urlInput" placeholder="Paste URL">
   <button id="startBtn" class="start-btn">▶ Start Reading</button>
   <button id="stopBtn" class="stop-btn" disabled>■ Stop & Sync</button>
   <div class="timer" id="timer">00:00:00</div>
@@ -439,7 +453,7 @@ async function retrySync(){
   openModal(`
     <h3>Syncing Queued Sessions</h3>
     <div class="spinner"></div>
-    <div class="loading-text">Syncing ${queuedSessions.length} session(s)...</div>
+    <div class="loading-text">Syncing ${queuedSessions.length} session(s)</div>
   `);
   
   const failed=[];
@@ -460,9 +474,9 @@ async function retrySync(){
   
   if(failed.length===0){
     await Promise.all([loadAnalytics(), loadHistory()]);
-    openModal(`<h3>✅ All Synced</h3><p>All queued sessions have been synced successfully.</p><button onclick="closeModal()">OK</button>`);
+    openModal(`<h3>✅ All Synced</h3><p>All queued sessions have been synced successfully</p><button onclick="closeModal()">OK</button>`);
   }else{
-    openModal(`<h3>⚠️ Partial Sync</h3><p>${failed.length} session(s) still failed to sync.</p><button onclick="closeModal()">OK</button>`);
+    openModal(`<h3>⚠️ Partial Sync</h3><p>${failed.length} session(s) still failed to sync</p><button onclick="closeModal()">OK</button>`);
   }
 }
 
@@ -513,17 +527,23 @@ function updateInternetStatus(online){
   const banner=document.getElementById("noInternetBanner");
   const message=document.getElementById("connectionMessage");
   const spinner=document.getElementById("connectionSpinner");
-  const refreshBtn=document.getElementById("refreshBtn");
   
   if(online && !hasInternetConnection){
     // Connection restored
     hasInternetConnection=true;
     banner.classList.add("restored");
-    spinner.style.display="none";
-    refreshBtn.style.display="block";
-    message.textContent="Connection restored";
+    spinner.style.display="block";
+    message.textContent="Connection restored...";
     
-    // Don't auto-hide, let user click refresh or manually close
+    // Auto-refresh data
+    loadAnalytics();
+    loadHistory();
+    
+    // Hide banner after 3 seconds
+    setTimeout(()=>{
+      banner.classList.remove("show","restored");
+      message.textContent="No internet connection, please try again...";
+    },3000);
   }else if(!online){
     // Connection lost
     hasInternetConnection=false;
@@ -531,37 +551,9 @@ function updateInternetStatus(online){
     banner.classList.add("show");
     message.textContent="No internet connection, please try again...";
     spinner.style.display="block";
-    refreshBtn.style.display="none";
     
     // Keep existing data visible, don't clear it
   }
-}
-
-function refreshAllData(){
-  const banner=document.getElementById("noInternetBanner");
-  const message=document.getElementById("connectionMessage");
-  const spinner=document.getElementById("connectionSpinner");
-  const refreshBtn=document.getElementById("refreshBtn");
-  
-  // Show loading state
-  message.textContent="Refreshing data...";
-  spinner.style.display="block";
-  refreshBtn.style.display="none";
-  
-  // Reload all data
-  Promise.all([loadAnalytics(), loadHistory()]).then(()=>{
-    // Hide banner after successful refresh
-    setTimeout(()=>{
-      banner.classList.remove("show","restored");
-      message.textContent="No internet connection, please try again...";
-      spinner.style.display="block";
-    },2000);
-  }).catch(()=>{
-    // If refresh fails, show error
-    message.textContent="Refresh failed, please try again";
-    refreshBtn.style.display="block";
-    spinner.style.display="none";
-  });
 }
 
 // Real-time internet connection detection
@@ -581,6 +573,9 @@ async function loadAnalytics(){
   statWeek.textContent="—";
   statStreak.textContent="—";
   perSite.innerHTML=`<div class="loading-container"><div class="spinner"></div><div class="loading-text">Loading analytics...</div></div>`;
+  
+  // Show loading state for visited links too
+  visitedLinks.innerHTML=`<li class="empty"><div class="loading-container"><div class="spinner"></div><div class="loading-text">Loading visited links...</div></div></li>`;
 
   try{
     const res=await fetch(`${SCRIPT_URL}?mode=analytics`);
@@ -711,9 +706,9 @@ function goPage(p){if(p<1||p>totalPages)return;page=p;loadHistory()}
 /* TIMER */
 let running=false,lastActive=0,totalMs=0,interval=null,frozenURL="";
 startBtn.onclick=()=>{
-  if(running){openModal(`<p>Session already running.</p><button onclick="closeModal()">OK</button>`);return}
-  if(!urlInput.value){openModal(`<p>Please paste a URL.</p><button onclick="closeModal()">OK</button>`);return}
-  try{new URL(urlInput.value)}catch{openModal(`<p>Invalid URL.</p><button onclick="closeModal()">OK</button>`);return}
+  if(running){openModal(`<p>Session already running</p><button onclick="closeModal()">OK</button>`);return}
+  if(!urlInput.value){openModal(`<p>Please paste a URL</p><button onclick="closeModal()">OK</button>`);return}
+  try{new URL(urlInput.value)}catch{openModal(`<p>Invalid URL</p><button onclick="closeModal()">OK</button>`);return}
   frozenURL=urlInput.value;
   running=true;totalMs=0;lastActive=Date.now();
   urlInput.disabled=true;startBtn.disabled=true;stopBtn.disabled=false;
@@ -738,7 +733,7 @@ async function confirmStop(){
   openModal(`
     <h3>Syncing</h3>
     <div class="spinner"></div>
-    <div class="loading-text">Syncing your reading session...</div>
+    <div class="loading-text">Syncing your reading session</div>
   `);
   
   try{
@@ -760,7 +755,7 @@ async function confirmStop(){
     reset();
     await Promise.all([loadAnalytics(), loadHistory()]);
     
-    openModal(`<h3>✅ Synced</h3><p>Your reading session has been saved successfully.</p><button onclick="closeModal()">OK</button>`);
+    openModal(`<h3>✅ Synced</h3><p>Your reading session has been saved successfully</p><button onclick="closeModal()">OK</button>`);
   }catch(err){
     console.error("Sync error:",err);
     
@@ -779,7 +774,7 @@ async function confirmStop(){
     
     openModal(`
       <h3>⚠️ Sync Failed</h3>
-      <p>Your session has been saved locally and queued for sync. We'll retry automatically when connection is restored.</p>
+      <p>Your session has been saved locally and queued for sync. We'll retry automatically when connection is restored</p>
       <button onclick="closeModal()">OK</button>
     `);
   }

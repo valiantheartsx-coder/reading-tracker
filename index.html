@@ -257,7 +257,15 @@ th:nth-child(4),td:nth-child(4){width:25%}
 
 ul{list-style:none;padding:0}
 li{padding:6px 0;border-bottom:1px solid var(--border)}
-a{color:var(--accent);text-decoration:none}
+a{
+  color:var(--accent);
+  text-decoration:none;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  word-break:break-all;
+  display:block;
+  line-height:1.4;
+}
 </style>
 </head>
 

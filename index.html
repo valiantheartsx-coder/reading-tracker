@@ -605,34 +605,54 @@ async function loadAnalytics(){
 }
 
 function renderAnalytics(){
-  const now=new Date();
-  const f=dateFilter.value;
-  const filtered=analyticsRows.filter(r=>{
-    const d=new Date(r.timestamp);
-    if(f==="today") return d.toDateString()===now.toDateString();
-    if(f==="7") return (now-d)/(86400000)<=7;
-    if(f==="30") return (now-d)/(86400000)<=30;
-    return true;
-  });
+  // Show loading state
+  statSessions.textContent="—";
+  statTime.textContent="—";
+  statWeek.textContent="—";
+  statStreak.textContent="—";
+  perSite.innerHTML=`<div class="loading-container"><div class="spinner"></div><div class="loading-text">Loading analytics...</div></div>`;
+  
+  // Small delay to show loading state
+  setTimeout(()=>{
+    const now=new Date();
+    const f=dateFilter.value;
+    const filtered=analyticsRows.filter(r=>{
+      const d=new Date(r.timestamp);
+      if(f==="today") return d.toDateString()===now.toDateString();
+      if(f==="7") return (now-d)/(86400000)<=7;
+      if(f==="30") return (now-d)/(86400000)<=30;
+      return true;
+    });
 
-  statSessions.textContent=filtered.length;
+    statSessions.textContent=filtered.length;
 
-  let total=0,siteMap={};
-  filtered.forEach(r=>{
-    const s=toSec(r.duration);
-    total+=s;
-    siteMap[r.site]=(siteMap[r.site]||0)+s;
-  });
+    let total=0,siteMap={},weekTotal=0;
+    const weekAgo=new Date(now.getTime()-7*86400000);
+    
+    filtered.forEach(r=>{
+      const s=toSec(r.duration);
+      total+=s;
+      siteMap[r.site]=(siteMap[r.site]||0)+s;
+    });
+    
+    // Calculate "This Week" from ALL data, not just filtered data
+    analyticsRows.forEach(r=>{
+      const d=new Date(r.timestamp);
+      if(d>=weekAgo){
+        weekTotal+=toSec(r.duration);
+      }
+    });
 
-  statTime.textContent=human(total);
-  statWeek.textContent="0 min";
-  statStreak.textContent="1 day";
+    statTime.textContent=human(total);
+    statWeek.textContent=human(weekTotal);
+    statStreak.textContent="1 day";
 
-  perSite.innerHTML=Object.keys(siteMap).length
-    ? Object.entries(siteMap).map(([k,v]) =>
-        `<div class="stat"><strong>${k}</strong><br>${human(v)}</div>`
-      ).join("")
-    : `<div class="empty">No data available</div>`;
+    perSite.innerHTML=Object.keys(siteMap).length
+      ? Object.entries(siteMap).map(([k,v]) =>
+          `<div class="stat"><strong>${k}</strong><br>${human(v)}</div>`
+        ).join("")
+      : `<div class="empty">No data available</div>`;
+  },300);
 }
 
 dateFilter.onchange=renderAnalytics;
@@ -641,21 +661,23 @@ dateFilter.onchange=renderAnalytics;
 function loadVisitedLinks(){
   visitedLinks.innerHTML=`<li class="empty"><div class="loading-container"><div class="spinner"></div><div class="loading-text">Loading visited links...</div></div></li>`;
   
-  try{
-    const map=new Map();
-    analyticsRows.forEach(r=>map.set(r.url,r));
-    let links=[...map.values()];
-    if(linkFilter.value==="newest") links.reverse();
+  setTimeout(()=>{
+    try{
+      const map=new Map();
+      analyticsRows.forEach(r=>map.set(r.url,r));
+      let links=[...map.values()];
+      if(linkFilter.value==="newest") links.reverse();
 
-    visitedLinks.innerHTML=links.length
-      ? links.slice(0,10)
-          .map(r=>`<li><a href="${r.url}" target="_blank">${r.url}</a></li>`)
-          .join("")
-      : `<li class="empty">No data available</li>`;
-  }catch(err){
-    console.error("Visited links error:",err);
-    visitedLinks.innerHTML=`<li class="empty">Failed to load visited links</li>`;
-  }
+      visitedLinks.innerHTML=links.length
+        ? links.slice(0,10)
+            .map(r=>`<li><a href="${r.url}" target="_blank">${r.url}</a></li>`)
+            .join("")
+        : `<li class="empty">No data available</li>`;
+    }catch(err){
+      console.error("Visited links error:",err);
+      visitedLinks.innerHTML=`<li class="empty">Failed to load visited links</li>`;
+    }
+  },100);
 }
 linkFilter.onchange=loadVisitedLinks;
 

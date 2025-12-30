@@ -12,7 +12,15 @@
   --border:#1f2937;
   --text:#e5e7eb;
   --muted:#9ca3af;
-  --accent:#3b82f6;
+
+  /* PATCH: flat colors */
+  --start:#22c55e;
+  --start-text:#052e16;
+  --stop:#ef4444;
+  --stop-text:#7f1d1d;
+
+  --accent:#60a5fa;
+  --warning:#f59e0b;
 }
 [data-theme="light"]{
   --bg:#f8fafc;
@@ -20,7 +28,14 @@
   --border:#e5e7eb;
   --text:#020617;
   --muted:#475569;
+
+  --start:#16a34a;
+  --start-text:#052e16;
+  --stop:#dc2626;
+  --stop-text:#7f1d1d;
+
   --accent:#2563eb;
+  --warning:#f59e0b;
 }
 
 body{
@@ -29,50 +44,107 @@ body{
   background:var(--bg);
   color:var(--text);
 }
-.container{max-width:1000px;margin:auto;padding:16px}
+.container{max-width:980px;margin:auto;padding:16px}
+
+/* PATCH: input width unification */
+input,select,button{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  margin-top:8px;
+  box-sizing:border-box;
+}
+
+input,select{
+  background:var(--border);
+  color:var(--text);
+}
+
+button{
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* PATCH: flat buttons */
+.start-btn{background:var(--start);color:white}
+.stop-btn{background:var(--stop);color:white}
+.stop-btn:disabled{opacity:0.5;cursor:not-allowed}
+
 .card{
   background:var(--card);
   border-radius:16px;
   padding:16px;
   margin-bottom:16px;
 }
-h1{text-align:center}
 
-input,button,select{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  margin-top:8px;
-}
-input,select{background:var(--border);color:var(--text)}
-button{font-weight:700;cursor:pointer}
-
-.start-btn{background:linear-gradient(135deg,#22c55e,#16a34a);color:white}
-.stop-btn{background:linear-gradient(135deg,#ef4444,#b91c1c);color:white}
-button:disabled{opacity:.5}
-
-.timer{text-align:center;font-size:2.4rem;margin-top:12px}
+.timer{text-align:center;font-size:2rem;margin-top:12px}
 
 .flex{display:flex;gap:12px;flex-wrap:wrap}
-.stat{background:var(--border);padding:14px;border-radius:14px;flex:1}
+.stat{background:var(--border);padding:12px;border-radius:12px;flex:1}
 
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:.9rem;
-}
-thead{background:var(--border)}
-th,td{
-  padding:10px;
-  border-bottom:1px solid var(--border);
-  text-align:left;
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid var(--border)}
+
+.pagination{display:flex;justify-content:center;gap:6px;margin-top:14px}
+.page-btn{padding:8px 14px;border-radius:999px;background:var(--border);cursor:pointer}
+.page-btn.active{background:var(--accent);color:white}
+.page-btn.disabled{opacity:.4;pointer-events:none}
+
+/* PATCH: empty state */
+.empty{
+  text-align:center;
+  color:var(--muted);
+  padding:12px;
 }
 
-.separator{margin:18px 0;height:1px;background:var(--border)}
+/* MODAL */
+.modal-bg{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+}
+.modal{
+  background:var(--card);
+  color:var(--text);
+  border-radius:16px;
+  padding:24px;
+  width:90%;
+  max-width:420px;
+  text-align:center;
+}
+.modal h3{
+  margin-top:0;
+}
+.modal p{
+  color:var(--muted);
+}
+.modal button{
+  background:var(--accent);
+  color:white;
+  margin-top:8px;
+}
+.modal-actions{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+}
+.modal-actions button{
+  flex:1;
+}
+.cancel-btn{
+  background:var(--border)!important;
+  color:var(--text)!important;
+}
 
 .spinner{
-  width:26px;height:26px;
+  width:28px;height:28px;
   border:4px solid var(--border);
   border-top:4px solid var(--accent);
   border-radius:50%;
@@ -81,97 +153,123 @@ th,td{
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
-label{font-size:.85rem;color:var(--muted)}
-ul{list-style:none;padding-left:0}
+.loading-container{
+  text-align:center;
+  width:100%;
+}
+.loading-text{
+  text-align:center;
+  color:var(--muted);
+  margin-top:8px;
+  font-size:14px;
+}
+
+/* No internet banner */
+.no-internet-banner{
+  background:#ef4444;
+  color:#fff;
+  padding:14px;
+  border-radius:12px;
+  text-align:center;
+  font-weight:600;
+  margin-bottom:16px;
+  display:none;
+  font-size:15px;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+}
+.no-internet-banner.show{
+  display:flex;
+}
+.no-internet-banner.restored{
+  background:#22c55e;
+}
+.no-internet-banner .spinner{
+  width:20px;
+  height:20px;
+  border:3px solid rgba(255,255,255,0.3);
+  border-top:3px solid #fff;
+  margin:0;
+}
+.refresh-btn{
+  background:#fff;
+  color:#22c55e;
+  padding:8px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+  border:none;
+  width:auto;
+  margin:0;
+}
+.refresh-btn:hover{
+  background:#f0f0f0;
+}
+
+/* Queue banner */
+.queue-banner{
+  background:var(--warning);
+  color:#000;
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:16px;
+  display:none;
+  align-items:center;
+  gap:12px;
+}
+.queue-banner.show{
+  display:flex;
+}
+.queue-text{
+  flex:1;
+}
+.queue-retry{
+  background:#000;
+  color:#fff;
+  padding:8px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+  border:none;
+  width:auto;
+  margin:0;
+}
+
+/* No internet banner per section (removed) */
+
+ul{list-style:none;padding:0}
 li{padding:6px 0;border-bottom:1px solid var(--border)}
 a{color:var(--accent);text-decoration:none}
-
-.loading{
-  text-align:center;
-  color:var(--muted);
-  padding:12px 0;
-}
-
-.no-data{
-  text-align:center;
-  color:var(--muted);
-  font-size:.9rem;
-  padding:12px 0;
-}
 </style>
 </head>
 
 <body>
 <div class="container">
-<h1>📖 Reading Tracker</h1>
 
-<!-- SESSION -->
-<div class="card">
-  <input id="urlInput" placeholder="Paste URL">
-  <button id="startBtn" class="start-btn">▶ Start Reading</button>
-  <button id="stopBtn" class="stop-btn" disabled>⏹ Stop & Sync</button>
-  <div class="timer" id="timer">00:00:00</div>
+<!-- No Internet Banner -->
+<div class="no-internet-banner" id="noInternetBanner">
+  <span id="connectionMessage">No internet connection, please try again...</span>
+  <div class="spinner" id="connectionSpinner"></div>
+  <button class="refresh-btn" id="refreshBtn" onclick="refreshAllData()" style="display:none">Refresh Data</button>
 </div>
 
-<!-- ANALYTICS -->
-<div class="card">
-<h3>📊 Analytics</h3>
-
-<label>Date Range</label>
-<select id="dateFilter">
-  <option value="all">All Time</option>
-  <option value="7">Last 7 Days</option>
-  <option value="30">Last 30 Days</option>
-</select>
-
-<div class="separator"></div>
-
-<div id="analyticsLoading" class="loading">
-  <div class="spinner"></div>
-  Loading analytics…
-</div>
-
-<div id="analyticsContent" style="display:none">
-  <div id="analyticsEmpty" class="no-data" style="display:none">
-    No data available
+<!-- Queue Banner -->
+<div class="queue-banner" id="queueBanner">
+  <div class="queue-text">
+    <strong>Sync Failed</strong><br>
+    <span id="queueCount">1</span> session(s) queued for sync
   </div>
-
-  <div id="analyticsStats">
-    <div class="flex">
-      <div class="stat"><strong>Total Sessions</strong><br><span id="statSessions">—</span></div>
-      <div class="stat"><strong>Total Time Spent Reading</strong><br><span id="statTime">—</span></div>
-      <div class="stat"><strong>This Week</strong><br><span id="statWeek">—</span></div>
-      <div class="stat"><strong>Streak</strong><br><span id="statStreak">—</span></div>
-    </div>
-
-    <p style="margin-top:12px;color:var(--muted);font-size:.85rem">
-      Time Spent Per Visited Page
-    </p>
-    <div id="perSite" class="flex"></div>
-  </div>
-</div>
+  <button class="queue-retry" onclick="toggleQueueList()">View Queue</button>
+  <button class="queue-retry" onclick="retrySync()">Retry Now</button>
 </div>
 
-<!-- VISITED LINKS -->
-<div class="card">
-<h3>🔗 Visited Links</h3>
-<div id="linksLoading" class="loading">
-  <div class="spinner"></div>
-  Loading visited links…
-</div>
-<div id="linksEmpty" class="no-data" style="display:none">
-  No data available
-</div>
-<ul id="visitedLinks"></ul>
-</div>
-
-<!-- SESSION HISTORY -->
-<div class="card">
-<h3>🕒 Session History</h3>
-
-<input id="searchInput" placeholder="Search sessions…">
-<div class="separator"></div>
-
+<!-- Queue List -->
+<div class="card" id="queueCard" style="display:none">
+<h3>📋 Queued Sessions</h3>
+<p style="color:var(--muted);font-size:14px">These sessions failed to sync and will be retried automatically or manually.</p>
 <table>
 <thead>
 <tr>
@@ -181,117 +279,528 @@ a{color:var(--accent);text-decoration:none}
   <th>Duration</th>
 </tr>
 </thead>
-
-<!-- ✅ MOVED HERE -->
-<tbody>
-<tr id="historyLoading">
-  <td colspan="4" class="loading">
-    <div class="spinner"></div>
-    Loading session history…
-  </td>
-</tr>
-<tr id="historyEmpty" style="display:none">
-  <td colspan="4" class="no-data">
-    No data available
-  </td>
-</tr>
-</tbody>
-
-<tbody id="tableBody"></tbody>
+<tbody id="queueTableBody"></tbody>
 </table>
 </div>
 
+<!-- HEADER (PATCH: themeSelect moved below title) -->
+<div class="card">
+  <h1>📖 Reading Tracker</h1>
+  <select id="themeSelect">
+    <option value="system">System</option>
+    <option value="light">Light</option>
+    <option value="dark">Dark</option>
+  </select>
+</div>
+
+<!-- SESSION -->
+<div class="card">
+  <input id="urlInput" placeholder="Paste chapter URL">
+  <button id="startBtn" class="start-btn">▶ Start Reading</button>
+  <button id="stopBtn" class="stop-btn" disabled>■ Stop & Sync</button>
+  <div class="timer" id="timer">00:00:00</div>
+</div>
+
+<!-- ANALYTICS -->
+<div class="card">
+<h3>📊 Analytics</h3>
+<label>Date Range</label>
+<select id="dateFilter">
+  <option value="all">All Time</option>
+  <option value="today">Today</option>
+  <option value="7">Last 7 Days</option>
+  <option value="30">Last 30 Days</option>
+</select>
+
+<div class="divider"></div>
+
+<div class="flex">
+  <div class="stat"><strong>Total Sessions</strong><br><span id="statSessions">—</span></div>
+  <div class="stat"><strong>Total Time Spent Reading</strong><br><span id="statTime">—</span></div>
+  <div class="stat"><strong>This Week</strong><br><span id="statWeek">—</span></div>
+  <div class="stat"><strong>Streak</strong><br><span id="statStreak">—</span></div>
+</div>
+
+<div class="divider"></div>
+<strong>Time Spent Per Visited Page</strong>
+<div id="perSite" class="flex" style="margin-top:12px">
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading analytics...</div>
+  </div>
+</div>
+</div>
+
+<!-- VISITED LINKS -->
+<div class="card">
+<h3>🔗 Visited Links</h3>
+<label>Filter</label>
+<select id="linkFilter">
+  <option value="recent">Recent</option>
+  <option value="newest">Newest</option>
+</select>
+<ul id="visitedLinks">
+  <li class="empty">
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading visited links...</div>
+    </div>
+  </li>
+</ul>
+</div>
+
+<!-- SESSION HISTORY -->
+<div class="card">
+<h3>🕒 Session History</h3>
+<label>Search</label>
+<input id="searchInput" placeholder="Search site, chapter, URL">
+<div class="divider"></div>
+<table>
+<thead>
+<tr>
+  <th>Timestamp</th>
+  <th>Site</th>
+  <th>Chapter</th>
+  <th>Duration</th>
+</tr>
+</thead>
+<tbody id="tableBody">
+  <tr>
+    <td colspan="4">
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading session history...</div>
+      </div>
+    </td>
+  </tr>
+</tbody>
+</table>
+<div class="pagination" id="pagination"></div>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal" id="modalContent"></div>
 </div>
 
 <script>
-/* 🔒 LOGIC LEFT UNCHANGED EXACTLY AS REQUESTED */
-
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbx-ald2rfnwCWOzxh9VY1UXvZnjr0h0b5_U_0EYoUTJ_2-Hip0PQMn0Hrz7G7IDgWbk/exec";
-let allRows=[];
 
-async function loadAll(){
-  analyticsLoading.style.display="";
-  analyticsContent.style.display="none";
-  linksLoading.style.display="";
-  historyLoading.style.display="";
+/* QUEUE SYSTEM */
+let queuedSessions=[];
+function loadQueue(){
+  const saved=localStorage.getItem("queuedSessions");
+  if(saved){
+    queuedSessions=JSON.parse(saved);
+    updateQueueBanner();
+    renderQueueTable();
+  }
+}
+function saveQueue(){
+  localStorage.setItem("queuedSessions",JSON.stringify(queuedSessions));
+  updateQueueBanner();
+  renderQueueTable();
+}
+function updateQueueBanner(){
+  const banner=document.getElementById("queueBanner");
+  const count=document.getElementById("queueCount");
+  if(queuedSessions.length>0){
+    count.textContent=queuedSessions.length;
+    banner.classList.add("show");
+  }else{
+    banner.classList.remove("show");
+    document.getElementById("queueCard").style.display="none";
+  }
+}
+function toggleQueueList(){
+  const card=document.getElementById("queueCard");
+  card.style.display=card.style.display==="none"?"block":"none";
+}
+function renderQueueTable(){
+  const tbody=document.getElementById("queueTableBody");
+  if(queuedSessions.length===0){
+    tbody.innerHTML=`<tr><td colspan="4" class="empty">No queued sessions</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=queuedSessions.map((s,i)=>`
+    <tr>
+      <td>${s.timestamp||new Date().toLocaleString()}</td>
+      <td>${s.site}</td>
+      <td>${s.chapter}</td>
+      <td>${s.duration}</td>
+    </tr>
+  `).join("");
+}
+async function retrySync(){
+  if(queuedSessions.length===0)return;
+  
+  openModal(`
+    <h3>Syncing Queued Sessions</h3>
+    <div class="spinner"></div>
+    <div class="loading-text">Syncing ${queuedSessions.length} session(s)...</div>
+  `);
+  
+  const failed=[];
+  for(const session of queuedSessions){
+    try{
+      const response=await fetch(SCRIPT_URL,{
+        method:"POST",
+        body:JSON.stringify(session)
+      });
+      if(!response.ok) throw new Error("Network response failed");
+    }catch{
+      failed.push(session);
+    }
+  }
+  
+  queuedSessions=failed;
+  saveQueue();
+  
+  if(failed.length===0){
+    await Promise.all([loadAnalytics(), loadHistory()]);
+    openModal(`<h3>✅ All Synced</h3><p>All queued sessions have been synced successfully.</p><button onclick="closeModal()">OK</button>`);
+  }else{
+    openModal(`<h3>⚠️ Partial Sync</h3><p>${failed.length} session(s) still failed to sync.</p><button onclick="closeModal()">OK</button>`);
+  }
+}
 
-  const res = await fetch(`${SCRIPT_URL}?mode=analytics`);
-  allRows = await res.json();
+/* THEME */
+const root=document.documentElement;
+const themeSelect=document.getElementById("themeSelect");
+const saved=localStorage.getItem("theme");
+function applyTheme(v){
+  if(v==="light") root.dataset.theme="light";
+  else if(v==="dark") root.dataset.theme="dark";
+  else{
+    root.removeAttribute("data-theme");
+    if(window.matchMedia("(prefers-color-scheme: light)").matches){
+      root.dataset.theme="light";
+    }
+  }
+}
+themeSelect.value=saved||"system";
+applyTheme(themeSelect.value);
+themeSelect.onchange=()=>{
+  localStorage.setItem("theme",themeSelect.value);
+  applyTheme(themeSelect.value);
+};
 
-  analyticsLoading.style.display="none";
-  analyticsContent.style.display="";
+/* MODAL */
+const modal=document.getElementById("modal");
+const modalContent=document.getElementById("modalContent");
+function openModal(h){modalContent.innerHTML=h;modal.style.display="flex"}
+function closeModal(){modal.style.display="none"}
 
-  renderAnalytics();
-  renderLinks();
-  renderTable();
+/* HELPERS */
+function toSec(d){const[a,b,c]=d.split(":").map(Number);return a*3600+b*60+c}
+function human(s){
+  if(s<60) return s+" sec";
+  if(s<3600) return Math.floor(s/60)+" min";
+  return Math.floor(s/3600)+" hr";
+}
+function fmt(ms){
+  const s=Math.floor(ms/1000);
+  return `${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor(s%3600/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+}
+
+/* DATA */
+let analyticsRows=[];
+let hasInternetConnection=navigator.onLine;
+
+function updateInternetStatus(online){
+  const banner=document.getElementById("noInternetBanner");
+  const message=document.getElementById("connectionMessage");
+  const spinner=document.getElementById("connectionSpinner");
+  const refreshBtn=document.getElementById("refreshBtn");
+  
+  if(online && !hasInternetConnection){
+    // Connection restored
+    hasInternetConnection=true;
+    banner.classList.add("restored");
+    spinner.style.display="none";
+    refreshBtn.style.display="block";
+    message.textContent="Connection restored";
+    
+    // Don't auto-hide, let user click refresh or manually close
+  }else if(!online){
+    // Connection lost
+    hasInternetConnection=false;
+    banner.classList.remove("restored");
+    banner.classList.add("show");
+    message.textContent="No internet connection, please try again...";
+    spinner.style.display="block";
+    refreshBtn.style.display="none";
+    
+    // Keep existing data visible, don't clear it
+  }
+}
+
+function refreshAllData(){
+  const banner=document.getElementById("noInternetBanner");
+  const message=document.getElementById("connectionMessage");
+  const spinner=document.getElementById("connectionSpinner");
+  const refreshBtn=document.getElementById("refreshBtn");
+  
+  // Show loading state
+  message.textContent="Refreshing data...";
+  spinner.style.display="block";
+  refreshBtn.style.display="none";
+  
+  // Reload all data
+  Promise.all([loadAnalytics(), loadHistory()]).then(()=>{
+    // Hide banner after successful refresh
+    setTimeout(()=>{
+      banner.classList.remove("show","restored");
+      message.textContent="No internet connection, please try again...";
+      spinner.style.display="block";
+    },2000);
+  }).catch(()=>{
+    // If refresh fails, show error
+    message.textContent="Refresh failed, please try again";
+    refreshBtn.style.display="block";
+    spinner.style.display="none";
+  });
+}
+
+// Real-time internet connection detection
+window.addEventListener('online',()=>{
+  console.log('Connection restored');
+  updateInternetStatus(true);
+});
+
+window.addEventListener('offline',()=>{
+  console.log('Connection lost');
+  updateInternetStatus(false);
+});
+
+async function loadAnalytics(){
+  statSessions.textContent="—";
+  statTime.textContent="—";
+  statWeek.textContent="—";
+  statStreak.textContent="—";
+  perSite.innerHTML=`<div class="loading-container"><div class="spinner"></div><div class="loading-text">Loading analytics...</div></div>`;
+
+  try{
+    const res=await fetch(`${SCRIPT_URL}?mode=analytics`);
+    if(!res.ok) throw new Error("Network error");
+    analyticsRows=await res.json();
+    updateInternetStatus(true);
+
+    /* PATCH: analytics empty state */
+    if(!analyticsRows.length){
+      statSessions.textContent="0";
+      statTime.textContent="0 min";
+      statWeek.textContent="0 min";
+      statStreak.textContent="0 day";
+      perSite.innerHTML=`<div class="empty">No data available</div>`;
+      loadVisitedLinks();
+      return;
+    }
+
+    renderAnalytics();
+    loadVisitedLinks();
+  }catch(err){
+    console.error("Analytics load error:",err);
+    updateInternetStatus(false);
+    perSite.innerHTML=`<div class="empty">Failed to load analytics</div>`;
+    visitedLinks.innerHTML=`<li class="empty">Failed to load visited links</li>`;
+  }
 }
 
 function renderAnalytics(){
-  statStreak.textContent="—";
-
-  if(allRows.length===0){
-    analyticsEmpty.style.display="";
-    analyticsStats.style.display="none";
-    return;
-  }
-
-  analyticsEmpty.style.display="none";
-  analyticsStats.style.display="";
-
-  const total=allRows.reduce((a,r)=>a+Number(r.durationSeconds||0),0);
-  statSessions.textContent=allRows.length;
-  statTime.textContent=`${Math.floor(total/60)} min`;
-  statWeek.textContent=statTime.textContent;
-  statStreak.textContent="1 day";
-
-  const siteMap={};
-  allRows.forEach(r=>{
-    siteMap[r.site]=(siteMap[r.site]||0)+Number(r.durationSeconds||0);
+  const now=new Date();
+  const f=dateFilter.value;
+  const filtered=analyticsRows.filter(r=>{
+    const d=new Date(r.timestamp);
+    if(f==="today") return d.toDateString()===now.toDateString();
+    if(f==="7") return (now-d)/(86400000)<=7;
+    if(f==="30") return (now-d)/(86400000)<=30;
+    return true;
   });
 
-  perSite.innerHTML=Object.entries(siteMap).length
-    ? Object.entries(siteMap).map(([k,v])=>`<div class="stat"><strong>${k}</strong><br>${Math.floor(v/60)} min</div>`).join("")
-    : `<div class="no-data">No data available</div>`;
+  statSessions.textContent=filtered.length;
+
+  let total=0,siteMap={};
+  filtered.forEach(r=>{
+    const s=toSec(r.duration);
+    total+=s;
+    siteMap[r.site]=(siteMap[r.site]||0)+s;
+  });
+
+  statTime.textContent=human(total);
+  statWeek.textContent="0 min";
+  statStreak.textContent="1 day";
+
+  perSite.innerHTML=Object.keys(siteMap).length
+    ? Object.entries(siteMap).map(([k,v]) =>
+        `<div class="stat"><strong>${k}</strong><br>${human(v)}</div>`
+      ).join("")
+    : `<div class="empty">No data available</div>`;
 }
 
-function renderLinks(){
-  const unique=[...new Map(allRows.map(r=>[r.url,r])).values()];
-  if(unique.length===0){
-    linksEmpty.style.display="";
-    visitedLinks.innerHTML="";
-  }else{
-    linksEmpty.style.display="none";
-    visitedLinks.innerHTML=unique.slice(0,10)
-      .map(r=>`<li><a href="${r.url}" target="_blank">${r.url}</a></li>`).join("");
+dateFilter.onchange=renderAnalytics;
+
+/* VISITED LINKS */
+function loadVisitedLinks(){
+  visitedLinks.innerHTML=`<li class="empty"><div class="loading-container"><div class="spinner"></div><div class="loading-text">Loading visited links...</div></div></li>`;
+  
+  try{
+    const map=new Map();
+    analyticsRows.forEach(r=>map.set(r.url,r));
+    let links=[...map.values()];
+    if(linkFilter.value==="newest") links.reverse();
+
+    visitedLinks.innerHTML=links.length
+      ? links.slice(0,10)
+          .map(r=>`<li><a href="${r.url}" target="_blank">${r.url}</a></li>`)
+          .join("")
+      : `<li class="empty">No data available</li>`;
+  }catch(err){
+    console.error("Visited links error:",err);
+    visitedLinks.innerHTML=`<li class="empty">Failed to load visited links</li>`;
   }
-  linksLoading.style.display="none";
 }
+linkFilter.onchange=loadVisitedLinks;
 
-function renderTable(){
+/* HISTORY */
+let historyRows=[],page=1,totalPages=1;
+async function loadHistory(){
+  tableBody.innerHTML=`<tr><td colspan="4"><div class="loading-container"><div class="spinner"></div><div class="loading-text">Loading session history...</div></div></td></tr>`;
+  try{
+    const res=await fetch(`${SCRIPT_URL}?page=${page}`);
+    if(!res.ok) throw new Error("Network error");
+    const j=await res.json();
+    historyRows=j.data;
+    totalPages=j.totalPages;
+    updateInternetStatus(true);
+    renderHistory();
+    renderPagination();
+  }catch(err){
+    console.error("History load error:",err);
+    updateInternetStatus(false);
+    tableBody.innerHTML=`<tr><td colspan="4" class="empty">Failed to load session history</td></tr>`;
+  }
+}
+function renderHistory(){
   const q=searchInput.value.toLowerCase();
-  const filtered=allRows.filter(r=>`${r.site} ${r.url}`.toLowerCase().includes(q));
+  const rows=historyRows.filter(r=>`${r.site} ${r.chapter} ${r.url}`.toLowerCase().includes(q));
+  if(!rows.length){
+    tableBody.innerHTML=`<tr><td colspan="4" class="empty">No data available</td></tr>`;
+    return;
+  }
+  tableBody.innerHTML=rows.map(r=>`
+    <tr><td>${r.timestamp}</td><td>${r.site}</td><td>${r.chapter}</td><td>${r.duration}</td></tr>
+  `).join("");
+}
+searchInput.oninput=renderHistory;
 
-  historyLoading.style.display="none";
+function renderPagination(){
+  let h=`<span class="page-btn ${page===1?'disabled':''}" onclick="goPage(${page-1})">Previous</span>`;
+  for(let i=1;i<=totalPages;i++){
+    if(i===1||i===totalPages||Math.abs(i-page)<=1){
+      h+=`<span class="page-btn ${i===page?'active':''}" onclick="goPage(${i})">${i}</span>`;
+    }else if(i===page-2||i===page+2){h+="<span>…</span>"}
+  }
+  h+=`<span class="page-btn ${page===totalPages?'disabled':''}" onclick="goPage(${page+1})">Next</span>`;
+  pagination.innerHTML=h;
+}
+function goPage(p){if(p<1||p>totalPages)return;page=p;loadHistory()}
 
-  if(filtered.length===0){
-    historyEmpty.style.display="";
-    tableBody.innerHTML="";
-  }else{
-    historyEmpty.style.display="none";
-    tableBody.innerHTML=filtered.map(r=>`
-      <tr>
-        <td>${r.timestamp}</td>
-        <td>${r.site}</td>
-        <td>${r.chapter||""}</td>
-        <td>${r.duration||""}</td>
-      </tr>
-    `).join("");
+/* TIMER */
+let running=false,lastActive=0,totalMs=0,interval=null,frozenURL="";
+startBtn.onclick=()=>{
+  if(running){openModal(`<p>Session already running.</p><button onclick="closeModal()">OK</button>`);return}
+  if(!urlInput.value){openModal(`<p>Please paste a URL.</p><button onclick="closeModal()">OK</button>`);return}
+  try{new URL(urlInput.value)}catch{openModal(`<p>Invalid URL.</p><button onclick="closeModal()">OK</button>`);return}
+  frozenURL=urlInput.value;
+  running=true;totalMs=0;lastActive=Date.now();
+  urlInput.disabled=true;startBtn.disabled=true;stopBtn.disabled=false;
+  interval=setInterval(()=>timer.textContent=fmt(totalMs+(Date.now()-lastActive)),500);
+  window.open(frozenURL,"_blank");
+};
+
+stopBtn.onclick=()=>{
+  openModal(`
+    <h3>Stop Reading Session?</h3>
+    <p>Do you want to stop and sync this reading session?</p>
+    <div class="modal-actions">
+      <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+      <button onclick="confirmStop()">Yes, Stop</button>
+    </div>
+  `);
+};
+
+async function confirmStop(){
+  totalMs+=Date.now()-lastActive;
+  clearInterval(interval);
+  openModal(`
+    <h3>Syncing</h3>
+    <div class="spinner"></div>
+    <div class="loading-text">Syncing your reading session...</div>
+  `);
+  
+  try{
+    const u=new URL(frozenURL);
+    const payload={
+      site:u.hostname.replace(/^www\./,""),
+      url:frozenURL,
+      chapter:(frozenURL.match(/chapter[-_\/ ]?(\d+)/i)||[])[1]||"-",
+      duration:fmt(totalMs)
+    };
+    
+    const response=await fetch(SCRIPT_URL,{
+      method:"POST",
+      body:JSON.stringify(payload)
+    });
+    
+    if(!response.ok) throw new Error("Network response failed");
+    
+    reset();
+    await Promise.all([loadAnalytics(), loadHistory()]);
+    
+    openModal(`<h3>✅ Synced</h3><p>Your reading session has been saved successfully.</p><button onclick="closeModal()">OK</button>`);
+  }catch(err){
+    console.error("Sync error:",err);
+    
+    // Add to queue
+    const u=new URL(frozenURL);
+    queuedSessions.push({
+      timestamp:new Date().toLocaleString(),
+      site:u.hostname.replace(/^www\./,""),
+      url:frozenURL,
+      chapter:(frozenURL.match(/chapter[-_\/ ]?(\d+)/i)||[])[1]||"-",
+      duration:fmt(totalMs)
+    });
+    saveQueue();
+    
+    reset();
+    
+    openModal(`
+      <h3>⚠️ Sync Failed</h3>
+      <p>Your session has been saved locally and queued for sync. We'll retry automatically when connection is restored.</p>
+      <button onclick="closeModal()">OK</button>
+    `);
   }
 }
 
-searchInput.oninput=renderTable;
-dateFilter.onchange=loadAll;
-loadAll();
+function reset(){
+  running=false;totalMs=0;frozenURL="";
+  urlInput.value="";urlInput.disabled=false;
+  startBtn.disabled=false;stopBtn.disabled=true;
+  timer.textContent="00:00:00";
+}
+
+/* INIT */
+// Check initial connection status
+if(!navigator.onLine){
+  updateInternetStatus(false);
+}
+
+loadQueue();
+loadAnalytics();
+loadHistory();
 </script>
 </body>
 </html>

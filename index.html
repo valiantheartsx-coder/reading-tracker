@@ -69,6 +69,9 @@ button{
 /* PATCH: flat buttons */
 .start-btn{background:var(--start);color:white}
 .start-btn:disabled{opacity:0.5;cursor:not-allowed}
+.pause-btn{background:#f59e0b;color:white}
+.pause-btn:disabled{opacity:0.5;cursor:not-allowed}
+.pause-btn.resume{background:var(--start)}
 .stop-btn{background:var(--stop);color:white}
 .stop-btn:disabled{opacity:0.5;cursor:not-allowed}
 
@@ -255,6 +258,142 @@ th:nth-child(4),td:nth-child(4){width:25%}
 
 /* No internet banner per section (removed) */
 
+/* Floating Timer */
+.floating-timer{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:var(--card);
+  border-radius:20px;
+  padding:16px 20px;
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+  display:none;
+  flex-direction:column;
+  gap:12px;
+  z-index:999;
+  min-width:200px;
+  border:1px solid var(--border);
+}
+.floating-timer.show{
+  display:flex;
+  animation:slideUp 0.3s ease;
+}
+.floating-timer.minimized{
+  padding:12px 16px;
+}
+.floating-timer.minimized .floating-controls,
+.floating-timer.minimized .floating-info{
+  display:none;
+}
+@keyframes slideUp{
+  from{transform:translateY(100px);opacity:0}
+  to{transform:translateY(0);opacity:1}
+}
+.floating-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+.floating-title{
+  font-size:12px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  font-weight:600;
+}
+.floating-actions{
+  display:flex;
+  gap:4px;
+}
+.floating-icon-btn{
+  background:var(--border);
+  border:none;
+  width:24px;
+  height:24px;
+  border-radius:6px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  color:var(--text);
+  padding:0;
+  margin:0;
+}
+.floating-icon-btn:hover{
+  background:var(--accent);
+  color:white;
+}
+.floating-display{
+  text-align:center;
+}
+.floating-time{
+  font-size:32px;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-1px;
+  color:var(--text);
+}
+.floating-info{
+  text-align:center;
+  font-size:11px;
+  color:var(--muted);
+  padding:8px;
+  background:var(--border);
+  border-radius:8px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.floating-controls{
+  display:flex;
+  gap:8px;
+}
+.floating-btn{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  font-weight:600;
+  cursor:pointer;
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  margin:0;
+  width:auto;
+  height:auto;
+}
+.floating-pause{
+  background:var(--warning);
+  color:white;
+}
+.floating-pause.resume{
+  background:var(--start);
+}
+.floating-stop{
+  background:var(--stop);
+  color:white;
+}
+
+@media(max-width:768px){
+  .floating-timer{
+    bottom:16px;
+    right:16px;
+    left:16px;
+    min-width:unset;
+    max-width:calc(100vw - 32px);
+  }
+  .floating-time{
+    font-size:28px;
+  }
+  .floating-info{
+    font-size:10px;
+  }
+}
+
 ul{list-style:none;padding:0}
 li{padding:6px 0;border-bottom:1px solid var(--border)}
 a{
@@ -319,6 +458,7 @@ a{
 <div class="card">
   <input id="urlInput" placeholder="Paste URL">
   <button id="startBtn" class="start-btn">▶ Start Reading</button>
+  <button id="pauseBtn" class="pause-btn" disabled>⏸ Pause</button>
   <button id="stopBtn" class="stop-btn" disabled>■ Stop & Sync</button>
   <div class="timer" id="timer">00:00:00</div>
 </div>
@@ -405,6 +545,28 @@ a{
 <!-- MODAL -->
 <div class="modal-bg" id="modal">
   <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- Floating Timer -->
+<div class="floating-timer" id="floatingTimer">
+  <div class="floating-header">
+    <span class="floating-title">Reading Session</span>
+    <div class="floating-actions">
+      <button class="floating-icon-btn" onclick="toggleMinimize()" title="Minimize">−</button>
+      <button class="floating-icon-btn" onclick="hideFloating()" title="Hide">×</button>
+    </div>
+  </div>
+  <div class="floating-display">
+    <div class="floating-time" id="floatingTime">00:00:00</div>
+  </div>
+  <div class="floating-info" id="floatingUrl">No URL</div>
+  <div class="floating-controls">
+    <button class="floating-btn floating-pause" id="floatingPause" onclick="pauseBtn.click()">
+      <span id="floatingPauseIcon">⏸</span>
+      <span id="floatingPauseText">Pause</span>
+    </button>
+    <button class="floating-btn floating-stop" onclick="stopBtn.click()">■ Stop</button>
+  </div>
 </div>
 
 <script>
@@ -620,7 +782,7 @@ function renderAnalytics(){
   statStreak.textContent="—";
   perSite.innerHTML=`<div class="loading-container"><div class="spinner"></div><div class="loading-text">Loading analytics...</div></div>`;
   
-  // Small delay to show loading state
+  // Reduced delay for snappier feel
   setTimeout(()=>{
     const now=new Date();
     const f=dateFilter.value;
@@ -660,7 +822,7 @@ function renderAnalytics(){
           `<div class="stat"><strong>${k}</strong><br>${human(v)}</div>`
         ).join("")
       : `<div class="empty">No data available</div>`;
-  },300);
+  },150);
 }
 
 dateFilter.onchange=renderAnalytics;
@@ -685,7 +847,7 @@ function loadVisitedLinks(){
       console.error("Visited links error:",err);
       visitedLinks.innerHTML=`<li class="empty">Failed to load visited links</li>`;
     }
-  },100);
+  },50);
 }
 linkFilter.onchange=loadVisitedLinks;
 
@@ -734,16 +896,92 @@ function renderPagination(){
 function goPage(p){if(p<1||p>totalPages)return;page=p;loadHistory()}
 
 /* TIMER */
-let running=false,lastActive=0,totalMs=0,interval=null,frozenURL="";
+let running=false,paused=false,lastActive=0,totalMs=0,interval=null,frozenURL="";
+let isMinimized=false;
+
+function toggleMinimize(){
+  isMinimized=!isMinimized;
+  const floatingTimer=document.getElementById("floatingTimer");
+  if(isMinimized){
+    floatingTimer.classList.add("minimized");
+  }else{
+    floatingTimer.classList.remove("minimized");
+  }
+}
+
+function hideFloating(){
+  document.getElementById("floatingTimer").classList.remove("show");
+}
+
+function showFloating(){
+  document.getElementById("floatingTimer").classList.add("show");
+  isMinimized=false;
+  document.getElementById("floatingTimer").classList.remove("minimized");
+}
+
+function updateFloatingTimer(){
+  const floatingTime=document.getElementById("floatingTime");
+  const floatingUrl=document.getElementById("floatingUrl");
+  const floatingPauseIcon=document.getElementById("floatingPauseIcon");
+  const floatingPauseText=document.getElementById("floatingPauseText");
+  const floatingPauseBtn=document.getElementById("floatingPause");
+  
+  if(!paused){
+    floatingTime.textContent=fmt(totalMs+(Date.now()-lastActive));
+  }
+  
+  if(paused){
+    floatingPauseIcon.textContent="▶";
+    floatingPauseText.textContent="Resume";
+    floatingPauseBtn.classList.add("resume");
+  }else{
+    floatingPauseIcon.textContent="⏸";
+    floatingPauseText.textContent="Pause";
+    floatingPauseBtn.classList.remove("resume");
+  }
+  
+  floatingUrl.textContent=frozenURL||"No URL";
+}
+
 startBtn.onclick=()=>{
   if(running){openModal(`<p>Session already running</p><button onclick="closeModal()">OK</button>`);return}
   if(!urlInput.value){openModal(`<p>Please paste a URL</p><button onclick="closeModal()">OK</button>`);return}
   try{new URL(urlInput.value)}catch{openModal(`<p>Invalid URL</p><button onclick="closeModal()">OK</button>`);return}
   frozenURL=urlInput.value;
-  running=true;totalMs=0;lastActive=Date.now();
-  urlInput.disabled=true;startBtn.disabled=true;stopBtn.disabled=false;
-  interval=setInterval(()=>timer.textContent=fmt(totalMs+(Date.now()-lastActive)),500);
+  running=true;paused=false;totalMs=0;lastActive=Date.now();
+  urlInput.disabled=true;startBtn.disabled=true;pauseBtn.disabled=false;stopBtn.disabled=false;
+  pauseBtn.textContent="⏸ Pause";
+  pauseBtn.classList.remove("resume");
+  
+  showFloating();
+  updateFloatingTimer();
+  
+  interval=setInterval(()=>{
+    if(!paused){
+      timer.textContent=fmt(totalMs+(Date.now()-lastActive));
+      updateFloatingTimer();
+    }
+  },500);
   window.open(frozenURL,"_blank");
+};
+
+pauseBtn.onclick=()=>{
+  if(!running)return;
+  
+  if(paused){
+    // Resume
+    paused=false;
+    lastActive=Date.now();
+    pauseBtn.textContent="⏸ Pause";
+    pauseBtn.classList.remove("resume");
+  }else{
+    // Pause
+    paused=true;
+    totalMs+=Date.now()-lastActive;
+    pauseBtn.textContent="▶ Resume";
+    pauseBtn.classList.add("resume");
+  }
+  updateFloatingTimer();
 };
 
 stopBtn.onclick=()=>{
@@ -758,13 +996,13 @@ stopBtn.onclick=()=>{
 };
 
 async function confirmStop(){
-  totalMs+=Date.now()-lastActive;
+  if(!paused){
+    totalMs+=Date.now()-lastActive;
+  }
   clearInterval(interval);
-  openModal(`
-    <h3>Syncing</h3>
-    <div class="spinner"></div>
-    <div class="loading-text">Syncing your reading session</div>
-  `);
+  hideFloating();
+  
+  openModal(`<h3>Syncing</h3><div class="spinner"></div>`);
   
   try{
     const u=new URL(frozenURL);
@@ -783,13 +1021,27 @@ async function confirmStop(){
     if(!response.ok) throw new Error("Network response failed");
     
     reset();
-    await Promise.all([loadAnalytics(), loadHistory()]);
     
+    // Parallel loading for faster refresh
+    const [analyticsData,historyData]=await Promise.all([
+      fetch(`${SCRIPT_URL}?mode=analytics`).then(r=>r.json()),
+      fetch(`${SCRIPT_URL}?page=${page}`).then(r=>r.json())
+    ]);
+    
+    analyticsRows=analyticsData;
+    historyRows=historyData.data;
+    totalPages=historyData.totalPages;
+    
+    renderAnalytics();
+    loadVisitedLinks();
+    renderHistory();
+    renderPagination();
+    
+    closeModal();
     openModal(`<h3>✅ Synced</h3><p>Your reading session has been saved successfully</p><button onclick="closeModal()">OK</button>`);
   }catch(err){
     console.error("Sync error:",err);
     
-    // Add to queue
     const u=new URL(frozenURL);
     queuedSessions.push({
       timestamp:new Date().toLocaleString(),
@@ -811,9 +1063,11 @@ async function confirmStop(){
 }
 
 function reset(){
-  running=false;totalMs=0;frozenURL="";
+  running=false;paused=false;totalMs=0;frozenURL="";
   urlInput.value="";urlInput.disabled=false;
-  startBtn.disabled=false;stopBtn.disabled=true;
+  startBtn.disabled=false;pauseBtn.disabled=true;stopBtn.disabled=true;
+  pauseBtn.textContent="⏸ Pause";
+  pauseBtn.classList.remove("resume");
   timer.textContent="00:00:00";
 }
 
